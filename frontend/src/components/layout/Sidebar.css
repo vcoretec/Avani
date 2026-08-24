@@ -1,0 +1,65 @@
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--navy-900);
+  display: flex; flex-direction: column;
+  z-index: 100;
+  transition: width var(--transition-base);
+  overflow: hidden;
+}
+.sidebar.collapsed { width: var(--sidebar-collapsed); }
+
+.sidebar-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  min-height: var(--header-height);
+}
+.brand-logo {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--teal-500), var(--teal-700));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.2rem; color: #fff; flex-shrink: 0;
+}
+.brand-name { font-weight: 800; font-size: 1rem; color: #fff; letter-spacing: 0.06em; white-space: nowrap; }
+
+.sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+
+.nav-section { margin-bottom: 8px; }
+.nav-section-label {
+  font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.35);
+  padding: 8px 12px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: var(--border-radius);
+  color: rgba(255,255,255,0.6); text-decoration: none;
+  font-weight: 500; font-size: 0.9rem;
+  transition: all var(--transition-fast);
+  margin-bottom: 2px; cursor: pointer; border: none; background: none; width: 100; text-align: left;
+}
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-item.active {
+  color: #fff; background: rgba(26,158,158,0.2);
+  border-left: 3px solid var(--teal-400);
+}
+.sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
+
+.sidebar-footer { padding: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
+.logout-btn { color: rgba(255,255,255,0.5) !important; }
+.logout-btn:hover { color: var(--red-500) !important; background: rgba(239,68,68,0.1) !important; }
+
+.sidebar-toggle {
+  position: absolute; top: 50%; right: -12px; transform: translateY(-50%);
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--navy-700); border: 2px solid var(--navy-900);
+  color: rgba(255,255,255,0.6); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition-fast); z-index: 101;
+}
+.sidebar-toggle:hover { background: var(--teal-600); color: #fff; }
+
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+}
