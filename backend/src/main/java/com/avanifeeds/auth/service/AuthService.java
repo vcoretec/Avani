@@ -11,6 +11,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.avanifeeds.auth.dto.RegisterRequest;
+import com.avanifeeds.user.entity.Role;
+import com.avanifeeds.user.repository.RoleRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.avanifeeds.common.exception.BusinessException;
+import com.avanifeeds.auth.entity.FarmerAuth;
+import com.avanifeeds.auth.entity.DriverAuth;
+import com.avanifeeds.auth.repository.FarmerAuthRepository;
+import com.avanifeeds.auth.repository.DriverAuthRepository;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,13 +28,25 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final FarmerAuthRepository farmerAuthRepository;
+    private final DriverAuthRepository driverAuthRepository;
 
     public AuthService(AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder,
+                       FarmerAuthRepository farmerAuthRepository,
+                       DriverAuthRepository driverAuthRepository) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.farmerAuthRepository = farmerAuthRepository;
+        this.driverAuthRepository = driverAuthRepository;
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -88,5 +109,88 @@ public class AuthService {
         );
 
         return response;
+    }
+
+    public void register(RegisterRequest request) {
+        if (userRepository.findByUsernameAndIsActiveTrue(request.getUsername()).isPresent()) {
+            throw new BusinessException("Username already exists");
+        }
+
+        Role userRole = roleRepository.findByName("MANAGEMENT")
+                .orElseGet(() -> roleRepository.findAll().stream().findFirst()
+                        .orElseThrow(() -> new BusinessException("No roles available")));
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setRole(userRole);
+        user.setIsActive(true);
+
+        userRepository.save(user);
+    }
+
+    public void registerFarmer(String mobileNumber, String password) {
+        if (mobileNumber == null || !mobileNumber.matches("\\d{10}")) {
+            throw new BusinessException("Please enter a valid 10-digit mobile number");
+        }
+        if (farmerAuthRepository.findByMobileNumber(mobileNumber).isPresent()) {
+            throw new BusinessException("Mobile number already registered");
+        }
+        FarmerAuth farmerAuth = new FarmerAuth();
+        farmerAuth.setMobileNumber(mobileNumber);
+        farmerAuth.setPassword(passwordEncoder.encode(password));
+        farmerAuthRepository.save(farmerAuth);
+    }
+
+    public LoginResponse loginFarmer(String mobileNumber, String password) {
+        if (mobileNumber == null || !mobileNumber.matches("\\d{10}")) {
+            throw new BusinessException("Please enter a valid 10-digit mobile number");
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken("farmer:" + mobileNumber, password)
+        );
+
+        String accessToken = tokenProvider.generateAccessToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken("farmer:" + mobileNumber);
+
+        LoginResponse response = new LoginResponse();
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+        response.setUsername(mobileNumber);
+        response.setFullName("Farmer " + mobileNumber);
+        response.setRole("FARMER");
+        response.setPermissions(java.util.List.of());
+        return response;
+    }
+
+    public LoginResponse loginDriver(String vehicleNumber, String password) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken("driver:" + vehicleNumber, password)
+        );
+
+        String accessToken = tokenProvider.generateAccessToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken("driver:" + vehicleNumber);
+
+        LoginResponse response = new LoginResponse();
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+        response.setUsername(vehicleNumber);
+        response.setFullName("Driver " + vehicleNumber);
+        response.setRole("DRIVER");
+        response.setPermissions(java.util.List.of());
+        return response;
+    }
+
+    public void registerDriver(String vehicleNumber, String password) {
+        if (driverAuthRepository.findByVehicleNumber(vehicleNumber).isPresent()) {
+            throw new BusinessException("Vehicle number already registered");
+        }
+        DriverAuth driverAuth = new DriverAuth();
+        driverAuth.setVehicleNumber(vehicleNumber);
+        driverAuth.setPassword(passwordEncoder.encode(password));
+        driverAuthRepository.save(driverAuth);
     }
 }

@@ -105,6 +105,11 @@ body {
 }
 .app-main.collapsed { margin-left: var(--sidebar-collapsed); }
 
+.sidebar-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 90; animation: fadeIn 0.2s ease;
+}
+
 .page-content { flex: 1; padding: 24px 28px; }
 
 /* ---- Page Header ---- */

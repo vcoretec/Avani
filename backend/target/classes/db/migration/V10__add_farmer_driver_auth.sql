@@ -1,0 +1,14 @@
+-- V10: Add Farmer and Driver Auth tables
+CREATE TABLE farmer_auth (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    mobile_number VARCHAR(20) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE driver_auth (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_number VARCHAR(20) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -4,6 +4,8 @@ import { authApi } from '../api';
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<void>;
+  loginFarmer: (mobileNumber: string, password: string) => Promise<void>;
+  loginDriver: (vehicleNumber: string, password: string) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
   hasRole: (role: string) => boolean;
@@ -28,7 +30,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     const res = await authApi.login({ username, password });
-    const data = res.data.data;
+    handleAuthResponse(res.data.data);
+  };
+
+  const loginFarmer = async (mobileNumber: string, password: string) => {
+    const res = await authApi.loginFarmer({ mobileNumber, password });
+    handleAuthResponse(res.data.data);
+  };
+
+  const loginDriver = async (vehicleNumber: string, password: string) => {
+    const res = await authApi.loginDriver({ vehicleNumber, password });
+    handleAuthResponse(res.data.data);
+  };
+
+  const handleAuthResponse = (data: any) => {
     const user: User = {
       username: data.username,
       fullName: data.fullName,
@@ -53,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasRole = (role: string) => state.user?.role === role;
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, hasPermission, hasRole }}>
+    <AuthContext.Provider value={{ ...state, login, loginFarmer, loginDriver, logout, hasPermission, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

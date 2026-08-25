@@ -27,9 +27,11 @@ const adminItems = [
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
   const { hasPermission, logout, user } = useAuth();
   const location = useLocation();
 
@@ -37,7 +39,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const visibleAdmin = adminItems.filter(item => hasPermission(item.permission));
 
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}>
       <div className="sidebar-brand">
         <div className="brand-logo">A</div>
         {!collapsed && <span className="brand-name">AVANI FEEDS</span>}
@@ -52,6 +54,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               to={item.path}
               className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
               title={collapsed ? item.label : undefined}
+              onClick={() => { if (onMobileClose) onMobileClose(); }}
             >
               <item.icon size={20} />
               {!collapsed && <span>{item.label}</span>}
@@ -68,6 +71,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 to={item.path}
                 className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
                 title={collapsed ? item.label : undefined}
+                onClick={() => { if (onMobileClose) onMobileClose(); }}
               >
                 <item.icon size={20} />
                 {!collapsed && <span>{item.label}</span>}

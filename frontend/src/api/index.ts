@@ -4,6 +4,11 @@ import type { LoginRequest } from '../types';
 export const authApi = {
   login: (data: LoginRequest) => apiClient.post('/auth/login', data),
   refresh: (refreshToken: string) => apiClient.post('/auth/refresh', { refreshToken }),
+  register: (data: any) => apiClient.post('/auth/register', data),
+  loginFarmer: (data: any) => apiClient.post('/auth/farmer/login', data),
+  registerFarmer: (data: any) => apiClient.post('/auth/farmer/register', data),
+  loginDriver: (data: any) => apiClient.post('/auth/driver/login', data),
+  registerDriver: (data: any) => apiClient.post('/auth/driver/register', data),
 };
 
 export const dashboardApi = {
